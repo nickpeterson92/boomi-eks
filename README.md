@@ -2,11 +2,17 @@
 
 This guide provides step-by-step instructions to set up and configure an AWS EKS cluster with FSx Lustre storage, including installing the necessary drivers, configuring persistent volumes, and deploying services.
 
+This guide assumes you have successfully run the following terraform commands:
+```sh
+terraform init
+terraform apply
+```
+
 ## Prerequisites
 - AWS CLI installed and configured
 - kubectl installed and configured
 - Helm installed
-- Terraform installed (for FSx setup)
+- Terraform installed
 
 ---
 
