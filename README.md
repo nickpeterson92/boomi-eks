@@ -130,7 +130,9 @@ rpm -qa | grep lustre
 ---
 
 ## 8. Deploy Boomi StatefulSet
+Before deploying the StatefulSet, ensure you generate an install token for your account from Atom Management -> New -> Molecule -> Linux 64 bit -> Generate Token.
 
+Update the INSTALL_TOKEN environment var in the boomi_statefulset.yaml within infra/kube to contain the token value.
 ```sh
 kubectl apply -f boomi_statefulset.yaml
 ```
