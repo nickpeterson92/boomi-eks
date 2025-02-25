@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: boomi-runtime-cluster-service
+  labels:
+    app: boomi-runtime-node
+spec:
+  selector:
+    app: boomi-runtime-node
+  ports:
+    - name: http-admin
+      protocol: TCP
+      port: 9090
+      targetPort: 9090
+      nodePort: 30090
+    - name: jmx-metrics
+      protocol: TCP
+      port: 9404
+      targetPort: 9404
+      nodePort: 30904
+  type: LoadBalancer

@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: boomi-runtime-node
+  labels:
+    app: boomi-runtime-node
+spec:
+  replicas: 4
+  serviceName: "boomi-runtime-cluster-service"
+  selector:
+    matchLabels:
+      app: boomi-runtime-node
+  template:
+    metadata:
+      labels:
+        app: boomi-runtime-node
+    spec:
+      terminationGracePeriodSeconds: 900
+      securityContext:
+        fsGroup: 1000
+      # Define a shared volume for the JMX agent jar and config
+      volumes:
+        - name: boomi-data-pvc
+          persistentVolumeClaim:
+            claimName: boomi-data
+        - name: jmx-agent
+          emptyDir: {}     # For the downloaded JAR file
+        - name: jmx-config
+          configMap:
+            name: jmx-exporter-config   # Create this ConfigMap with your YAML config
+      # Add an init container to download the JMX exporter jar
+      initContainers:
+        - name: jmx-agent-download
+          image: curlimages/curl:7.85.0
+          command:
+            - sh
+            - -c
+            - |
+              curl -L -o /tmp/jmx_prometheus_javaagent.jar https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.16.1/jmx_prometheus_javaagent-0.16.1.jar
+          volumeMounts:
+            - name: jmx-agent
+              mountPath: /tmp
+        - name: fix-permissions
+          image: busybox
+          command: [ "sh", "-c", "chown -R 1000:1000 /mnt/boomi && chmod -R 775 /mnt/boomi" ]
+          securityContext:
+            runAsUser: 0  # Run as root to modify permissions
+          volumeMounts:
+            - name: boomi-data-pvc
+              mountPath: /mnt/boomi
+      containers:
+        - name: boomi-runtime-cluster-node
+          image: docker.io/boomi/molecule:release-rhel
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9090
+              protocol: TCP
+            - containerPort: 9404    # Port for the JMX exporter metrics
+              protocol: TCP
+          resources:
+            limits:
+              cpu: "2000m"
+              memory: "4096Mi"
+            requests:
+              cpu: "500m"
+              memory: "1024Mi"
+          volumeMounts:
+            - name: boomi-data-pvc
+              mountPath: "/mnt/boomi"
+            - name: jmx-agent
+              mountPath: /tmp
+            - name: jmx-config
+              mountPath: /etc/jmx-exporter
+          readinessProbe:
+            httpGet:
+              path: /_admin/readiness
+              port: 9090
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /_admin/liveness
+              port: 9090
+            periodSeconds: 60
+          env:
+            - name: BOOMI_ATOMNAME
+              value: "boomi-runtime-cluster-eks"
+            - name: ATOM_LOCALHOSTID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: INSTALL_TOKEN
+              value: " key-goes-here"
+            - name: ATOM_VMOPTIONS_OVERRIDES
+              value: ""
+            - name: CONTAINER_PROPERTIES_OVERRIDES
+              value: ""
+            - name: INSTALL4J_ADD_VM_PARAMS
+              value: "-javaagent:/tmp/jmx_prometheus_javaagent.jar=9404:/etc/jmx-exporter/jmx_exporter_config.yaml"

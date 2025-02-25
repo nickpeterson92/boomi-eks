@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: lustre-client-installer
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: lustre-client-installer
+  template:
+    metadata:
+      labels:
+        app: lustre-client-installer
+    spec:
+      hostPID: true
+      hostIPC: true
+      hostNetwork: true
+      containers:
+      - name: lustre-installer
+        image: amazonlinux:2023
+        securityContext:
+          privileged: true
+        command:
+        - /bin/bash
+        - -c
+        - |
+          if ! rpm -qa | grep -q lustre-client; then
+            dnf install -y kmod-lustre-client lustre-client
+            echo "Lustre client installed"
+          else
+            echo "Lustre client already installed"
+          fi
+          sleep infinity
