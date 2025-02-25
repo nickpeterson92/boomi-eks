@@ -1,56 +1,136 @@
-Below is a list of commands to run on the cluster and EC2 instances....
+# AWS EKS with FSx CSI Driver Setup
 
-// check cluster status
+This guide provides step-by-step instructions to set up and configure an AWS EKS cluster with FSx Lustre storage, including installing the necessary drivers, configuring persistent volumes, and deploying services.
+
+## Prerequisites
+- AWS CLI installed and configured
+- kubectl installed and configured
+- Helm installed
+- Terraform installed (for FSx setup)
+
+---
+
+## 1. Check Cluster and Node Status
+
+### Update kubeconfig to connect to the EKS cluster
+```sh
 aws eks --region us-west-2 update-kubeconfig --name boomi-eks-cluster
+```
 
-// check node status
+### Verify node status
+```sh
 kubectl get nodes
+```
 
-// install fsx csi driver
+---
+
+## 2. Install FSx CSI Driver
+
+### Add the Helm repository and update
+```sh
 helm repo add aws-fsx-csi-driver https://kubernetes-sigs.github.io/aws-fsx-csi-driver/
 helm repo update
+```
+
+### Install the FSx CSI driver
+```sh
 helm upgrade --install aws-fsx-csi-driver aws-fsx-csi-driver/aws-fsx-csi-driver \
   --namespace kube-system \
   --set node.serviceAccount.create=false \
   --set node.serviceAccount.name=aws-node
+```
 
-// confirm install
+### Confirm installation
+```sh
 kubectl get pods -n kube-system | grep fsx
+```
 
-// update kube yaml with new fs fields
-// you need id, dnsname and mount
-// used in boomi_pv and fsx_storage_class
+---
+
+## 3. Update Terraform Configuration with FSx Details
+
+### Retrieve FSx Lustre details (ID, DNS name, mount points)
+```sh
 terraform state show module.fsx.aws_fsx_lustre_file_system.this
+```
 
-// apply storage class
+---
+
+## 4. Apply Storage Configurations
+
+### Apply StorageClass
+```sh
 kubectl apply -f fsx-storage-class.yaml
+```
 
-// apply persistent volume
+### Apply Persistent Volume (PV)
+```sh
 kubectl apply -f boomi_pv.yaml
+```
 
-// apply persistent volume claim
+### Apply Persistent Volume Claim (PVC)
+```sh
 kubectl apply -f boomi_pvc.yaml
+```
 
-// deploy config and svcs
+---
+
+## 5. Deploy Configuration and Services
+
+### Deploy JMX exporter configuration
+```sh
 kubectl apply -f jmx_exporter_config.yaml
+```
+
+### Deploy Boomi services and Horizontal Pod Autoscaler (HPA)
+```sh
 kubectl apply -f boomi_svc.yaml
 kubectl apply -f boomi_hpa.yaml
+```
 
-// deploy lustre client daemon
+---
+
+## 6. Deploy Lustre Client Daemon
+
+```sh
 kubectl apply -f lustre-client-installer.yaml
+```
 
-// confirm
+### Confirm Deployment
+```sh
 kubectl get pv
 kubectl get pvc
 kubectl get configmap
 kubectl get svc
 kubectl get hpa
+```
 
-// ssh or session manager into ec2 instances
+---
+
+## 7. Connect to EC2 Instances and Install Lustre Client
+
+### SSH or use AWS Session Manager to connect to EC2 instances
+
+### Install Lustre Client
+```sh
 sudo dnf install -y lustre-client
+```
 
-// validate install
+### Validate Installation
+```sh
 rpm -qa | grep lustre
+```
 
-// deploy stateful set
+---
+
+## 8. Deploy Boomi StatefulSet
+
+```sh
 kubectl apply -f boomi_statefulset.yaml
+```
+
+---
+
+## Conclusion
+You have now successfully set up FSx Lustre storage on an AWS EKS cluster, deployed necessary services, and configured persistent storage for Boomi workloads.
+
