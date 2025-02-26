@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: boomi-metrics
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: boomi-runtime-node
+  endpoints:
+    - port: jmx
+      path: /metrics
+      interval: 30s
+      scheme: http

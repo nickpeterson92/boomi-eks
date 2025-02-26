@@ -59,6 +59,39 @@ data:
         type: GAUGE
         help: "JVM process CPU load as a fraction between 0.0 and 1.0"
 
+      # --- Disk Usage ---
+      - pattern: 'java.lang<type=OperatingSystem><>FreePhysicalMemorySize'
+        name: jvm_memory_physical_free_bytes
+        type: GAUGE
+        help: "Free physical memory in bytes"
+
+      - pattern: 'java.lang<type=OperatingSystem><>TotalPhysicalMemorySize'
+        name: jvm_memory_physical_total_bytes
+        type: GAUGE
+        help: "Total physical memory in bytes"
+
+      # --- IOPS Metrics (if available in Boomi JMX) ---
+      - pattern: 'java.lang<type=OperatingSystem><>DiskReadBytes'
+        name: jvm_disk_read_bytes_total
+        type: COUNTER
+        help: "Total disk read bytes"
+
+      - pattern: 'java.lang<type=OperatingSystem><>DiskWriteBytes'
+        name: jvm_disk_write_bytes_total
+        type: COUNTER
+        help: "Total disk write bytes"
+
+      # --- Inode Exhaustion (if exposed via JMX) ---
+      - pattern: 'java.lang<type=FileSystem><>FreeInodes'
+        name: jvm_filesystem_free_inodes
+        type: GAUGE
+        help: "Free inodes available"
+
+      - pattern: 'java.lang<type=FileSystem><>TotalInodes'
+        name: jvm_filesystem_total_inodes
+        type: GAUGE
+        help: "Total inodes available"
+        
       # --- Boomi-Specific Metrics (Optional) ---
       # If Boomi exposes custom MBeans, you might see metrics like processed documents or error counts.
       # Uncomment and adjust the rule below if such an MBean is available.
