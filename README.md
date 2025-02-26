@@ -66,7 +66,7 @@ terraform state show module.fsx.aws_fsx_lustre_file_system.this
 
 ### Apply StorageClass
 ```sh
-kubectl apply -f fsx-storage-class.yaml
+kubectl apply -f fsx_storage_class.yaml
 ```
 
 ### Apply Persistent Volume (PV)
