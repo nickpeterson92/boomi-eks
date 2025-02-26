@@ -139,6 +139,24 @@ kubectl apply -f boomi_statefulset.yaml
 
 ---
 
+## 9. Install Prometheus Operator and Deploy Prometheus Kube Resources
+```sh
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm install prometheus prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
+```
+
+### Validate the install
+```sh
+kubectl get pods -n monitoring
+```
+
+### Create JMX Exporter ServiceMonitor
+```sh
+kubectl apply -f boomi_servicemonitor.yaml
+```
+---
+
 ## Conclusion
 You have now successfully set up FSx Lustre storage on an AWS EKS cluster, deployed necessary services, and configured persistent storage for Boomi workloads.
 
