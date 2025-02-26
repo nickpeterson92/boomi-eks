@@ -153,7 +153,7 @@ kubectl get pods -n monitoring
 
 ### Create JMX Exporter ServiceMonitor
 ```sh
-kubectl apply -f boomi_servicemonitor.yaml
+kubectl apply -f service_monitor.yaml
 ```
 ---
 
