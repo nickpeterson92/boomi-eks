@@ -141,7 +141,7 @@ kubectl apply -f boomi_statefulset.yaml
 
 ## 9. Deploy Prometheus Kube Resources
 ```sh
-kubectl apply -f boomi_statefulset.yaml
+kubectl apply -f prometheus.yaml
 ```
 
 ### Validate the install
