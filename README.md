@@ -139,11 +139,10 @@ kubectl apply -f boomi_statefulset.yaml
 
 ---
 
-## 9. Install Prometheus Operator and Deploy Prometheus Kube Resources
+## 9. Deploy Prometheus Kube Resources
+Deploy prometheus itself
 ```sh
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo update
-helm install prometheus prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
+kubectl apply -f boomi_statefulset.yaml
 ```
 
 ### Validate the install
