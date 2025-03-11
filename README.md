@@ -140,7 +140,6 @@ kubectl apply -f boomi_statefulset.yaml
 ---
 
 ## 9. Deploy Prometheus Kube Resources
-Deploy prometheus itself
 ```sh
 kubectl apply -f boomi_statefulset.yaml
 ```
@@ -148,11 +147,6 @@ kubectl apply -f boomi_statefulset.yaml
 ### Validate the install
 ```sh
 kubectl get pods -n monitoring
-```
-
-### Create JMX Exporter ServiceMonitor
-```sh
-kubectl apply -f service_monitor.yaml
 ```
 ---
 
